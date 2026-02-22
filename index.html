@@ -1,0 +1,3143 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>2026 紐西蘭南島露營車</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans TC", sans-serif;
+        background-color: #f0f9ff;
+        color: #334155;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .active-tab {
+        background-color: #0ea5e9;
+        color: white;
+        box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.3);
+      }
+      .glass-morphism {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .ice-blue-gradient {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      }
+      .card-shadow {
+        box-shadow:
+          0 10px 25px -5px rgba(14, 165, 233, 0.05),
+          0 8px 10px -6px rgba(14, 165, 233, 0.05);
+      }
+      .animate-fadeIn {
+        animation: fadeIn 0.2s ease-out forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+      }
+      .calendar-day {
+        min-height: 52px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 4px 2px;
+        border-radius: 8px;
+        font-size: 10px;
+        transition: all 0.2s;
+        border: 1px solid #f1f5f9;
+      }
+      .guide-check {
+        display: flex;
+        align-items: center;
+        font-size: 11px;
+        margin-bottom: 6px;
+      }
+      .guide-check i {
+        margin-right: 8px;
+        color: #0ea5e9;
+        flex-shrink: 0;
+      }
+      input[type="checkbox"] {
+        display: none;
+      }
+      input[type="checkbox"]:checked + div.person-check {
+        background-color: #0ea5e9;
+        color: white;
+        border-color: #0ea5e9;
+        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+      }
+    </style>
+  </head>
+  <body
+    class="max-w-md mx-auto shadow-2xl min-h-screen relative overflow-x-hidden"
+  >
+    <div id="app" class="pb-28 relative">
+      <header
+        class="bg-white/80 backdrop-blur-md px-6 pt-10 pb-4 sticky top-0 z-40 border-b border-blue-50"
+      >
+        <div class="flex justify-between items-start">
+          <div>
+            <h1 class="text-2xl font-bold text-sky-600 tracking-tight">
+              2026 紐西蘭南島 🇳🇿
+            </h1>
+            <p class="text-xs text-slate-400 mt-0.5">2026/4/25 - 5/8</p>
+          </div>
+          <div class="bg-sky-50 px-3 py-1.5 rounded-2xl text-right">
+            <p
+              class="text-[10px] text-sky-400 font-bold uppercase leading-tight"
+            >
+              溫度範圍
+            </p>
+            <p class="text-sm font-bold text-sky-600">5 ~ 15°C</p>
+          </div>
+        </div>
+        <div
+          v-if="currentView === 'itinerary'"
+          class="mt-6 overflow-x-auto hide-scrollbar flex space-x-3 py-2"
+        >
+          <button
+            v-for="(day, index) in itinerary"
+            :key="index"
+            @click="activeDayIndex = index"
+            class="flex-shrink-0 w-14 h-16 rounded-2xl flex flex-col items-center justify-center transition-all border border-transparent"
+            :class="activeDayIndex === index ? 'active-tab' : 'bg-slate-50 text-slate-400'"
+          >
+            <span class="text-[10px] uppercase font-medium"
+              >{{ day.shortDate.split('/')[0] }}</span
+            >
+            <span class="text-lg font-bold"
+              >{{ day.shortDate.split('/')[1] }}</span
+            >
+          </button>
+        </div>
+      </header>
+
+      <main class="px-5 mt-4">
+        <div
+          v-if="currentView === 'overview'"
+          class="space-y-6 animate-fadeIn pb-6"
+        >
+          <div>
+            <div
+              class="mb-4 bg-gradient-to-br from-sky-400 to-sky-600 rounded-3xl p-5 text-white shadow-lg shadow-sky-200 relative overflow-hidden"
+            >
+              <div
+                class="absolute -right-4 -top-4 opacity-20 pointer-events-none"
+              >
+                <i data-lucide="coins" class="w-24 h-24"></i>
+              </div>
+              <div class="relative z-10 flex justify-between items-end">
+                <div>
+                  <p
+                    class="text-[10px] font-bold opacity-90 uppercase tracking-widest mb-1 flex items-center"
+                  >
+                    <i data-lucide="calculator" class="w-3 h-3 mr-1.5"></i> {{
+                    filterPerson ? `${filterPerson.toUpperCase()} 的總分攤` :
+                    '旅程總花費' }} (台幣)
+                  </p>
+                  <div class="flex items-baseline space-x-1">
+                    <span class="text-sm font-bold opacity-80">NT$</span>
+                    <h2 class="text-3xl font-black tracking-tight">
+                      {{ totalExpenseTWD }}
+                    </h2>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span
+                    class="text-[9px] bg-white/20 px-2 py-1 rounded-full font-bold shadow-sm"
+                    ><i
+                      data-lucide="globe"
+                      class="w-3 h-3 inline-block mr-0.5 -mt-0.5"
+                    ></i
+                    >{{ isRateLive ? '即時匯率' : '固定匯率' }}</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-2">
+              <button
+                @click="filterPerson = ''"
+                class="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap shadow-sm transition-all border"
+                :class="filterPerson === '' ? 'bg-sky-500 text-white border-sky-500 shadow-sky-200' : 'bg-white text-slate-500 border-slate-200'"
+              >
+                全部紀錄
+              </button>
+              <button
+                v-for="p in uniquePersons"
+                :key="p"
+                @click="filterPerson = p"
+                class="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap shadow-sm transition-all border"
+                :class="filterPerson === p ? 'bg-sky-500 text-white border-sky-500 shadow-sky-200' : 'bg-white text-slate-500 border-slate-200'"
+              >
+                {{ p }} 的花費
+              </button>
+            </div>
+          </div>
+          <h2 class="text-lg font-bold text-slate-700 flex items-center">
+            <i data-lucide="calendar" class="w-5 h-5 mr-2 text-sky-500"></i>
+            行程月曆概覽
+          </h2>
+          <div
+            class="bg-white p-4 rounded-[2rem] card-shadow border border-slate-50"
+          >
+            <h3 class="text-sm font-black text-sky-400 mb-3 ml-2">
+              2026 APRIL 四月
+            </h3>
+            <div
+              class="calendar-grid text-[9px] font-bold text-slate-300 mb-1 text-center"
+            >
+              <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span
+              ><span>THU</span><span>FRI</span><span>SAT</span>
+            </div>
+            <div class="calendar-grid">
+              <div v-for="i in 3" :key="'apr_blank_'+i"></div>
+              <div
+                v-for="d in 30"
+                :key="'apr'+d"
+                class="calendar-day"
+                :class="getCalendarDayClass('04', d)"
+                @click="handleCalendarClick('04', d)"
+              >
+                <span class="font-bold mb-1">{{ d }}</span
+                ><span
+                  class="text-[8px] leading-tight text-center overflow-hidden h-6"
+                  v-html="getCalendarLabel('04', d)"
+                ></span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white p-4 rounded-[2rem] card-shadow border border-slate-50"
+          >
+            <h3 class="text-sm font-black text-sky-400 mb-3 ml-2">
+              2026 MAY 五月
+            </h3>
+            <div
+              class="calendar-grid text-[9px] font-bold text-slate-300 mb-1 text-center"
+            >
+              <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span
+              ><span>THU</span><span>FRI</span><span>SAT</span>
+            </div>
+            <div class="calendar-grid">
+              <div v-for="i in 5" :key="'may_blank_'+i"></div>
+              <div
+                v-for="d in 31"
+                :key="'may'+d"
+                class="calendar-day"
+                :class="getCalendarDayClass('05', d)"
+                @click="handleCalendarClick('05', d)"
+              >
+                <span class="font-bold mb-1">{{ d }}</span
+                ><span
+                  class="text-[8px] leading-tight text-center overflow-hidden h-6"
+                  v-html="getCalendarLabel('05', d)"
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="currentView === 'itinerary'" class="animate-fadeIn">
+          <div
+            class="mb-5 ice-blue-gradient p-5 rounded-[2rem] relative overflow-hidden"
+          >
+            <div class="absolute -right-4 -top-4 opacity-10">
+              <i data-lucide="map" class="w-24 h-24"></i>
+            </div>
+            <div class="flex justify-between items-center">
+              <div class="flex items-center space-x-2">
+                <span
+                  class="text-[10px] font-bold bg-sky-500 text-white px-2 py-0.5 rounded-full uppercase"
+                  >Day {{ activeDayIndex + 1 }}</span
+                >
+                <span class="font-bold text-sky-800"
+                  >{{ activeDay.titleEmoji }} {{ activeDay.transportTitle
+                  }}</span
+                >
+              </div>
+              <button
+                @click="toggleAllSpots"
+                class="flex-shrink-0 flex items-center space-x-1 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-100 text-[11px] font-medium text-sky-600 active:scale-95 transition-transform"
+              >
+                <span
+                  :class="allExpanded ? 'rotate-180' : ''"
+                  class="transition-transform inline-block"
+                  ><i data-lucide="chevrons-down" class="w-3.5 h-3.5"></i
+                ></span>
+                <span>{{ allExpanded ? '全部收起' : '全部展開' }}</span>
+              </button>
+            </div>
+            <p class="text-xs text-sky-700 leading-relaxed font-medium mt-2">
+              {{ activeDay.description }}
+            </p>
+          </div>
+
+          <div class="space-y-2 relative">
+            <div v-if="isLoadingList" class="text-center py-10">
+              <i
+                data-lucide="loader-2"
+                class="w-6 h-6 animate-spin text-sky-400 mx-auto"
+              ></i>
+            </div>
+            <div
+              v-else-if="!activeDay.spots || activeDay.spots.length === 0"
+              class="text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-[1.25rem] border border-slate-100 border-dashed"
+            >
+              這天還沒有安排行程喔！<br /><span
+                class="text-[10px] font-normal opacity-70"
+                >資料庫同步中，或前往表單新增</span
+              >
+            </div>
+
+            <template v-else>
+              <template
+                v-for="(spot, sIdx) in activeDay.spots"
+                :key="spot.ID || sIdx"
+              >
+                <div
+                  v-if="sIdx > 0 && spot.Drive_Time"
+                  class="ml-[42px] my-1.5 text-[10px] text-slate-400 font-bold flex items-center"
+                >
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-200 mr-2"></div>
+                  <i data-lucide="car" class="w-3 h-3 text-sky-400 mr-1.5"></i>
+                  車程 {{ spot.Drive_Time }}
+                </div>
+                <div v-else-if="sIdx > 0" class="h-2"></div>
+
+                <div
+                  class="bg-white rounded-2xl overflow-hidden border border-slate-100 card-shadow transition-all relative z-10"
+                >
+                  <div
+                    class="px-3 py-3 flex justify-between items-center cursor-pointer active:bg-slate-50 transition-colors"
+                    @click="toggleSpot(sIdx)"
+                  >
+                    <div
+                      class="flex items-center space-x-2.5 overflow-hidden pr-2 w-full"
+                    >
+                      <div
+                        class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm"
+                        :class="getCategoryColor(spot.Category).bg"
+                      >
+                        <i
+                          :data-lucide="getItineraryIcon(spot.Category)"
+                          class="w-4 h-4"
+                          :class="getCategoryColor(spot.Category).text"
+                        ></i>
+                      </div>
+                      <div
+                        class="flex items-baseline space-x-1.5 truncate flex-1"
+                      >
+                        <span
+                          v-if="spot.Time_Start"
+                          class="text-[13px] font-black text-sky-600 shrink-0"
+                          >{{ formatTime(spot.Time_Start) }}</span
+                        >
+                        <h3
+                          class="text-[13px] font-bold text-slate-800 truncate"
+                        >
+                          {{ spot.Title || '未命名行程' }}
+                        </h3>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                      <span
+                        :class="spot.expanded ? 'rotate-180' : ''"
+                        class="transition-transform shrink-0 inline-block text-slate-300"
+                      >
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    v-show="spot.expanded"
+                    class="px-3 pb-3 pt-0 animate-fadeIn border-t border-slate-50 relative"
+                  >
+                    <div
+                      v-if="spot.Photo_Url"
+                      class="w-full h-32 bg-slate-100 rounded-xl overflow-hidden mt-3 mb-2"
+                    >
+                      <img
+                        :src="spot.Photo_Url"
+                        class="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div
+                      v-if="spot.Category === '機票'"
+                      class="bg-sky-50/50 rounded-xl p-2.5 border border-sky-100 mt-3 mb-2"
+                    >
+                      <div class="flex justify-between items-center px-4 mb-2">
+                        <span class="font-black text-sky-700 text-base"
+                          >{{ formatTime(spot.Time_Start) || '--:--' }}</span
+                        >
+                        <div class="flex-1 flex justify-center text-sky-300">
+                          <i data-lucide="plane" class="w-4 h-4"></i>
+                        </div>
+                        <span class="font-black text-sky-700 text-base"
+                          >{{ formatTime(spot.Time_End) || '--:--' }}</span
+                        >
+                      </div>
+                      <div
+                        class="flex flex-wrap gap-x-3 gap-y-1.5 text-[10px] text-slate-600 border-t border-sky-100 pt-2"
+                        v-if="spot.Location_Details || spot.Ext_Time1 || spot.Reservation_No || spot.Amount_TWD"
+                      >
+                        <span
+                          v-if="spot.Location_Details"
+                          class="flex items-center"
+                          ><b class="text-sky-500/80 mr-1">航廈</b>{{
+                          spot.Location_Details }}</span
+                        >
+                        <span v-if="spot.Ext_Time1" class="flex items-center"
+                          ><b class="text-sky-500/80 mr-1">報到</b>{{
+                          formatTime(spot.Ext_Time1) }}</span
+                        >
+                        <span
+                          v-if="spot.Reservation_No"
+                          class="flex items-center"
+                          ><b class="text-sky-500/80 mr-1">PNR</b
+                          ><span class="font-mono bg-white px-1 rounded"
+                            >{{ spot.Reservation_No }}</span
+                          ></span
+                        >
+                        <span v-if="spot.Amount_TWD" class="flex items-center"
+                          ><b class="text-sky-500/80 mr-1">花費</b>NT$ {{
+                          formatMoney(spot.Amount_TWD) }}</span
+                        >
+                      </div>
+                    </div>
+
+                    <div
+                      v-else-if="spot.Category === '住宿' && (spot.Time_End || spot.Location_Details || spot.Reservation_No || spot.Amount_TWD)"
+                      class="bg-amber-50/50 rounded-xl p-2.5 border border-amber-100 mt-3 mb-2"
+                    >
+                      <div
+                        class="flex flex-wrap gap-x-3 gap-y-1.5 text-[10px] text-slate-600"
+                      >
+                        <span v-if="spot.Time_End" class="flex items-center"
+                          ><b class="text-amber-600/70 mr-1">退房</b>{{
+                          formatTime(spot.Time_End) }}</span
+                        >
+                        <span
+                          v-if="spot.Location_Details"
+                          class="flex items-center"
+                          ><b class="text-amber-600/70 mr-1">房型/營位</b>{{
+                          spot.Location_Details }}</span
+                        >
+                        <span
+                          v-if="spot.Reservation_No"
+                          class="flex items-center"
+                          ><b class="text-amber-600/70 mr-1">訂單</b
+                          ><span class="font-mono bg-white px-1 rounded"
+                            >{{ spot.Reservation_No }}</span
+                          ></span
+                        >
+                        <span v-if="spot.Amount_TWD" class="flex items-center"
+                          ><b class="text-amber-600/70 mr-1">花費</b>NT$ {{
+                          formatMoney(spot.Amount_TWD) }}</span
+                        >
+                      </div>
+                    </div>
+
+                    <div
+                      v-else-if="spot.Category === '餐費' && (spot.Ext_Time1 || spot.Reservation_No || spot.Amount_TWD)"
+                      class="bg-rose-50/50 rounded-xl p-2.5 border border-rose-100 mt-3 mb-2"
+                    >
+                      <div
+                        class="flex flex-wrap gap-x-3 gap-y-1.5 text-[10px] text-slate-600"
+                      >
+                        <span v-if="spot.Ext_Time1" class="flex items-center"
+                          ><b class="text-rose-400/80 mr-1">營業</b>{{
+                          spot.Ext_Time1 }}</span
+                        >
+                        <span
+                          v-if="spot.Reservation_No"
+                          class="flex items-center"
+                          ><b class="text-rose-400/80 mr-1">代號</b
+                          ><span class="font-mono bg-white px-1 rounded"
+                            >{{ spot.Reservation_No }}</span
+                          ></span
+                        >
+                        <span v-if="spot.Amount_TWD" class="flex items-center"
+                          ><b class="text-rose-400/80 mr-1">花費</b>NT$ {{
+                          formatMoney(spot.Amount_TWD) }}</span
+                        >
+                      </div>
+                    </div>
+
+                    <div
+                      v-else-if="(spot.Category === '娛樂' || spot.Category === '交通' || !spot.Category) && (spot.Duration || spot.Ext_Location || spot.Reservation_No || spot.Amount_TWD)"
+                      class="bg-emerald-50/50 rounded-xl p-2.5 border border-emerald-100 mt-3 mb-2"
+                    >
+                      <div
+                        class="flex flex-wrap gap-x-3 gap-y-1.5 text-[10px] text-slate-600"
+                      >
+                        <span v-if="spot.Duration" class="flex items-center"
+                          ><b class="text-emerald-500/80 mr-1">停留</b>{{
+                          spot.Duration }}</span
+                        >
+                        <span v-if="spot.Ext_Location" class="flex items-center"
+                          ><b class="text-emerald-500/80 mr-1">集合地</b>{{
+                          spot.Ext_Location }}</span
+                        >
+                        <span
+                          v-if="spot.Reservation_No"
+                          class="flex items-center"
+                          ><b class="text-emerald-500/80 mr-1">憑證</b
+                          ><span class="font-mono bg-white px-1 rounded"
+                            >{{ spot.Reservation_No }}</span
+                          ></span
+                        >
+                        <span v-if="spot.Amount_TWD" class="flex items-center"
+                          ><b class="text-emerald-500/80 mr-1">花費</b>NT$ {{
+                          formatMoney(spot.Amount_TWD) }}</span
+                        >
+                      </div>
+                    </div>
+
+                    <div
+                      class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-2 mt-3 w-full"
+                    >
+                      <div class="flex justify-between items-start mb-1.5">
+                        <h4
+                          class="text-[10px] font-bold text-slate-400 uppercase flex items-center"
+                        >
+                          <i data-lucide="book-open" class="w-3 h-3 mr-1"></i>
+                          筆記 & 遊記
+                        </h4>
+                        <button
+                          @click.stop="openEditModal(spot)"
+                          class="text-sky-500 bg-white border border-sky-100 px-2 py-1 rounded-md shadow-sm active:scale-95 transition-transform flex items-center text-[9px] font-bold"
+                        >
+                          <i data-lucide="edit-3" class="w-2.5 h-2.5 mr-1"></i>
+                          編輯
+                        </button>
+                      </div>
+                      <p
+                        v-if="spot.Notes"
+                        class="text-[11px] text-slate-600 leading-relaxed whitespace-pre-wrap"
+                      >
+                        {{ spot.Notes }}
+                      </p>
+                      <p v-else class="text-[10px] text-slate-400 italic">
+                        點擊右上角按鈕新增遊記或照片連結...
+                      </p>
+                    </div>
+
+                    <div
+                      class="flex gap-2 mt-2"
+                      v-if="spot.Map_Link || spot.Attachment"
+                    >
+                      <a
+                        v-if="spot.Map_Link"
+                        :href="spot.Map_Link"
+                        target="_blank"
+                        class="flex-1 bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center py-2 rounded-lg text-[10px] font-bold active:bg-sky-100 transition-colors"
+                        ><i data-lucide="map-pinned" class="w-3 h-3 mr-1.5"></i>
+                        導航</a
+                      >
+                      <a
+                        v-if="spot.Attachment"
+                        :href="spot.Attachment"
+                        target="_blank"
+                        class="flex-1 bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center py-2 rounded-lg text-[10px] font-bold active:bg-slate-200 transition-colors"
+                        ><i data-lucide="ticket" class="w-3 h-3 mr-1.5"></i>
+                        開啟憑證</a
+                      >
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </div>
+
+          <div
+            class="mt-6 mb-6 flex space-x-3 overflow-x-auto hide-scrollbar"
+            v-if="activeDay.weather"
+          >
+            <div
+              class="bg-white p-3 rounded-2xl border border-slate-50 card-shadow flex-1 shrink-0 min-w-[90px]"
+            >
+              <span
+                class="text-[10px] font-bold text-slate-400 uppercase flex items-center mb-1"
+                ><i
+                  data-lucide="cloud-sun"
+                  class="w-3 h-3 text-sky-400 mr-1"
+                ></i
+                >天氣</span
+              >
+              <p class="text-[11px] font-bold text-slate-700">
+                {{ activeDay.weather.temp }} / {{ activeDay.weather.desc }}
+              </p>
+            </div>
+            <div
+              class="bg-white p-3 rounded-2xl border border-slate-50 card-shadow flex-1 shrink-0 min-w-[90px]"
+            >
+              <span
+                class="text-[10px] font-bold text-slate-400 uppercase flex items-center mb-1"
+                ><i
+                  data-lucide="sunset"
+                  class="w-3 h-3 text-orange-400 mr-1"
+                ></i
+                >日落時間</span
+              >
+              <p class="text-[11px] font-bold text-slate-700">
+                {{ activeDay.weather.sunset }}
+              </p>
+            </div>
+            <div
+              class="bg-white p-3 rounded-2xl border border-slate-50 card-shadow flex-1 shrink-0 min-w-[90px]"
+            >
+              <span
+                class="text-[10px] font-bold text-slate-400 uppercase flex items-center mb-1"
+                ><i
+                  data-lucide="shirt"
+                  class="w-3 h-3 text-emerald-400 mr-1"
+                ></i
+                >穿搭建議</span
+              >
+              <p class="text-[11px] font-bold text-slate-700">
+                {{ activeDay.weather.wear }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="currentView === 'map'"
+          class="h-[74vh] animate-fadeIn relative flex flex-col"
+        >
+          <div
+            class="flex-1 rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white relative bg-sky-50"
+          >
+            <iframe
+              src="https://www.google.com/maps/d/u/0/embed?mid=1iHn6PxeksEzO2hifzW0fA3WUbXpAdfY&ehbc=2E312F&noprof=1"
+              class="w-full h-full"
+              style="border: 0"
+              allowfullscreen=""
+              loading="lazy"
+            ></iframe>
+            <div
+              class="absolute top-4 left-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-2xl border border-sky-100 shadow-xl"
+            >
+              <p class="text-[10px] font-black text-sky-600 uppercase mb-1">
+                行程景點地圖
+              </p>
+              <a
+                href="https://maps.app.goo.gl/kMc6aQurpp2HXiJM6"
+                target="_blank"
+                class="w-full bg-sky-500 text-white flex items-center justify-center py-2.5 rounded-xl text-xs font-bold transition-active active:scale-95"
+                ><i data-lucide="map" class="w-3 h-3 mr-2"></i> 直接開啟 Google
+                地圖景點</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <div v-if="currentView === 'expenses'" class="animate-fadeIn pb-12">
+          <div class="flex justify-between items-center mb-5">
+            <h2 class="text-lg font-bold text-slate-700 flex items-center">
+              <i data-lucide="wallet" class="w-5 h-5 mr-2 text-sky-500"></i>
+              旅行費用與分帳
+            </h2>
+            <div
+              v-if="expenseSubView === 'add' && editMode"
+              @click="cancelEdit"
+              class="w-8 h-8 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 cursor-pointer"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div
+            class="flex bg-slate-100/80 p-1.5 rounded-2xl backdrop-blur-sm mb-6"
+          >
+            <button
+              @click="expenseSubView = 'list'"
+              :class="expenseSubView === 'list' ? 'bg-white shadow-sm text-sky-600' : 'text-slate-500'"
+              class="flex-1 py-2 text-xs font-bold rounded-xl flex justify-center items-center"
+            >
+              <i data-lucide="layout-list" class="w-3.5 h-3.5 mr-1"></i>明細
+            </button>
+            <button
+              @click="expenseSubView = 'add'"
+              :class="expenseSubView === 'add' ? 'bg-sky-500 shadow-sm text-white' : 'text-slate-500'"
+              class="flex-1 py-2 text-xs font-bold rounded-xl flex justify-center items-center"
+            >
+              <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i>記帳
+            </button>
+            <button
+              @click="expenseSubView = 'chart'"
+              :class="expenseSubView === 'chart' ? 'bg-white shadow-sm text-sky-600' : 'text-slate-500'"
+              class="flex-1 py-2 text-xs font-bold rounded-xl flex justify-center items-center"
+            >
+              <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 mr-1"></i>圖表
+            </button>
+          </div>
+
+          <div
+            v-show="expenseSubView === 'add'"
+            class="bg-white p-6 rounded-[2rem] card-shadow border border-slate-50 animate-fadeIn"
+          >
+            <form @submit.prevent="submitExpense" class="space-y-5">
+              <div
+                class="flex justify-between bg-emerald-50 p-4 rounded-2xl border border-emerald-100"
+              >
+                <div>
+                  <label
+                    class="block text-[11px] font-black text-emerald-700 uppercase"
+                    >✔️ 行前已結清</label
+                  >
+                </div>
+                <label class="relative inline-flex cursor-pointer"
+                  ><input
+                    type="checkbox"
+                    v-model="form.isSettled"
+                    class="sr-only peer" />
+                  <div
+                    class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"
+                  ></div
+                ></label>
+              </div>
+              <div>
+                <label
+                  class="block text-[11px] font-bold text-sky-500 uppercase mb-2 ml-1"
+                  >Date 日期</label
+                ><input
+                  type="date"
+                  v-model="form.date"
+                  required
+                  class="w-full bg-slate-50 border border-slate-100 text-slate-700 text-sm rounded-2xl p-3.5 outline-none focus:ring-2 focus:ring-sky-200"
+                />
+              </div>
+              <div class="flex space-x-3">
+                <div class="flex-[2]">
+                  <label
+                    class="block text-[11px] font-bold text-sky-500 uppercase mb-2 ml-1"
+                    >Amount 金額</label
+                  ><input
+                    type="number"
+                    v-model="form.amount"
+                    step="0.01"
+                    required
+                    class="w-full bg-slate-50 border border-slate-100 text-slate-800 text-lg font-bold rounded-2xl p-3 outline-none focus:ring-2 focus:ring-sky-200"
+                  />
+                </div>
+                <div class="flex-[1]">
+                  <label
+                    class="block text-[11px] font-bold text-sky-500 uppercase mb-2 ml-1"
+                    >Currency</label
+                  ><input
+                    type="text"
+                    v-model="form.currency"
+                    required
+                    class="w-full bg-slate-50 border border-slate-100 text-slate-700 text-sm font-bold rounded-2xl p-3.5 text-center outline-none"
+                  />
+                </div>
+              </div>
+              <div
+                class="flex space-x-2 overflow-x-auto hide-scrollbar pb-1 -mt-3"
+              >
+                <button
+                  type="button"
+                  v-for="c in quickOptions.currencies"
+                  :key="c"
+                  @click="form.currency = c"
+                  class="flex-shrink-0 px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all"
+                  :class="form.currency === c ? 'bg-sky-500 text-white shadow-md shadow-sky-200' : 'bg-sky-50 text-sky-600'"
+                >
+                  {{ c }}
+                </button>
+              </div>
+              <div
+                class="flex space-x-3 bg-sky-50/50 p-3 rounded-2xl border border-sky-100/50"
+              >
+                <div class="flex-1">
+                  <label
+                    class="block text-[10px] font-bold text-sky-600 uppercase mb-2 ml-1"
+                    >付款方式</label
+                  >
+                  <div class="flex space-x-2">
+                    <button
+                      type="button"
+                      @click="setPaymentMethod('現金')"
+                      class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all"
+                      :class="form.paymentMethod === '現金' ? 'bg-sky-500 text-white shadow-md' : 'bg-white text-slate-500'"
+                    >
+                      💵 現金</button
+                    ><button
+                      type="button"
+                      @click="setPaymentMethod('信用卡')"
+                      class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all"
+                      :class="form.paymentMethod === '信用卡' ? 'bg-rose-400 text-white shadow-md shadow-rose-200' : 'bg-white text-slate-500'"
+                    >
+                      💳 刷卡
+                    </button>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <label
+                    class="block text-[10px] font-bold text-sky-600 uppercase mb-2 ml-1"
+                    >最終台幣</label
+                  >
+                  <div class="relative">
+                    <span
+                      class="absolute left-3 top-2.5 text-slate-400 font-bold text-sm"
+                      >NT$</span
+                    ><input
+                      type="number"
+                      v-model="form.actualTwd"
+                      @input="onManualTwdInput"
+                      class="w-full bg-white border border-slate-100 text-sky-700 text-sm font-black rounded-xl py-2.5 pl-10 pr-3 outline-none focus:ring-2 focus:ring-sky-300"
+                      :class="{'bg-yellow-50 text-yellow-700 border-yellow-200': isManualTwd}"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="flex space-x-3">
+                <div class="flex-1">
+                  <label
+                    class="block text-[11px] font-bold text-sky-500 uppercase mb-2 ml-1"
+                    >Payer</label
+                  ><input
+                    type="text"
+                    v-model="form.payer"
+                    required
+                    class="w-full bg-slate-50 border border-slate-100 text-slate-700 text-sm rounded-2xl p-3 outline-none"
+                  />
+                  <div
+                    class="flex space-x-2 mt-2 overflow-x-auto hide-scrollbar pb-1"
+                  >
+                    <button
+                      type="button"
+                      v-for="p in quickOptions.payers"
+                      :key="p"
+                      @click="form.payer = p"
+                      class="flex-shrink-0 px-3 py-1 rounded-xl text-[10px] font-bold"
+                      :class="form.payer === p ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-500'"
+                    >
+                      {{ p }}
+                    </button>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <label
+                    class="block text-[11px] font-bold text-sky-500 uppercase mb-2 ml-1"
+                    >Category</label
+                  ><input
+                    type="text"
+                    v-model="form.category"
+                    required
+                    class="w-full bg-slate-50 border border-slate-100 text-slate-700 text-sm rounded-2xl p-3 outline-none"
+                  />
+                </div>
+              </div>
+              <div class="flex gap-2 flex-wrap -mt-2">
+                <button
+                  type="button"
+                  v-for="cat in quickOptions.categories"
+                  :key="cat"
+                  @click="form.category = cat"
+                  class="px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all"
+                  :class="form.category === cat ? 'bg-sky-500 text-white shadow-md shadow-sky-200' : 'bg-slate-100 text-slate-500'"
+                >
+                  {{ cat }}
+                </button>
+              </div>
+              <div>
+                <label
+                  class="block text-[11px] font-bold text-sky-500 uppercase mb-2 ml-1"
+                  >Participants</label
+                >
+                <div class="flex flex-wrap gap-2">
+                  <label
+                    v-for="person in availableParticipants"
+                    :key="'part-'+person"
+                    class="cursor-pointer"
+                    ><input
+                      type="checkbox"
+                      :value="person"
+                      v-model="form.participants"
+                    />
+                    <div
+                      class="person-check px-3 py-1.5 rounded-xl text-[11px] font-medium border border-slate-200 bg-white text-slate-500 flex items-center transition-all"
+                    >
+                      {{ person }}
+                    </div></label
+                  >
+                </div>
+              </div>
+              <div>
+                <label
+                  class="block text-[11px] font-bold text-sky-500 uppercase mb-2 ml-1"
+                  >Note</label
+                ><input
+                  type="text"
+                  v-model="form.note"
+                  class="w-full bg-slate-50 border border-slate-100 text-slate-700 text-sm rounded-2xl p-3.5 outline-none"
+                />
+              </div>
+              <div class="pt-2">
+                <div
+                  v-if="status.message"
+                  :class="status.isError ? 'text-rose-500 bg-rose-50' : 'text-sky-600 bg-sky-50'"
+                  class="mb-3 p-3 rounded-xl text-xs font-bold text-center"
+                >
+                  {{ status.message }}
+                </div>
+                <button
+                  type="submit"
+                  :disabled="isSubmitting"
+                  class="w-full text-white font-bold text-sm py-4 rounded-2xl shadow-lg transition-all flex justify-center items-center"
+                  :class="editMode ? 'bg-amber-500 shadow-amber-200' : 'bg-sky-500 shadow-sky-200'"
+                >
+                  <i
+                    v-if="isSubmitting"
+                    data-lucide="loader-2"
+                    class="w-5 h-5 mr-2 animate-spin"
+                  ></i
+                  ><i
+                    v-else
+                    :data-lucide="editMode ? 'save' : 'send'"
+                    class="w-4 h-4 mr-2"
+                  ></i
+                  >{{ submitBtnText }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div v-show="expenseSubView === 'list'" class="animate-fadeIn">
+            <div
+              class="mb-5 bg-gradient-to-br from-sky-400 to-sky-600 rounded-3xl p-5 text-white shadow-lg shadow-sky-200 relative overflow-hidden"
+            >
+              <div class="absolute -right-4 -top-4 opacity-20">
+                <i data-lucide="coins" class="w-24 h-24"></i>
+              </div>
+              <div class="relative z-10 flex justify-between items-end">
+                <div>
+                  <p
+                    class="text-[10px] font-bold opacity-90 uppercase tracking-widest mb-1 flex items-center"
+                  >
+                    <i data-lucide="calculator" class="w-3 h-3 mr-1.5"></i> {{
+                    filterPerson ? `${filterPerson.toUpperCase()} 的總分攤` :
+                    '旅程總花費' }} (台幣)
+                  </p>
+                  <div class="flex items-baseline space-x-1">
+                    <span class="text-sm font-bold opacity-80">NT$</span>
+                    <h2 class="text-3xl font-black tracking-tight">
+                      {{ totalExpenseTWD }}
+                    </h2>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span
+                    class="text-[9px] bg-white/20 px-2 py-1 rounded-full font-bold shadow-sm"
+                    ><i
+                      data-lucide="globe"
+                      class="w-3 h-3 inline-block mr-0.5 -mt-0.5"
+                    ></i
+                    >{{ isRateLive ? '即時匯率' : '固定匯率' }}</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div
+              class="flex space-x-2 mb-4 overflow-x-auto hide-scrollbar pb-2"
+            >
+              <button
+                @click="filterPerson = ''"
+                class="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap shadow-sm transition-all border"
+                :class="filterPerson === '' ? 'bg-sky-500 text-white border-sky-500 shadow-sky-200' : 'bg-white text-slate-500 border-slate-200'"
+              >
+                全部紀錄</button
+              ><button
+                v-for="p in uniquePersons"
+                :key="p"
+                @click="filterPerson = p"
+                class="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap shadow-sm transition-all border"
+                :class="filterPerson === p ? 'bg-sky-500 text-white border-sky-500 shadow-sky-200' : 'bg-white text-slate-500 border-slate-200'"
+              >
+                {{ p }} 的花費
+              </button>
+            </div>
+            <div
+              v-if="isLoadingList"
+              class="text-center py-10 text-slate-400 font-bold text-sm flex flex-col items-center"
+            >
+              <i
+                data-lucide="loader-2"
+                class="w-6 h-6 animate-spin mb-2 text-sky-400"
+              ></i
+              >資料讀取中...
+            </div>
+            <div
+              v-else-if="displayRecords.length === 0"
+              class="text-center py-10 text-slate-400 font-bold text-sm"
+            >
+              找不到相關的記帳紀錄喔！
+            </div>
+            <div v-else class="space-y-4">
+              <div
+                v-for="(item, index) in displayRecords"
+                :key="item.ID || index"
+                @click="startEdit(item)"
+                class="bg-white p-4 rounded-2xl card-shadow border border-slate-50 cursor-pointer active:scale-95 transition-transform relative overflow-hidden"
+              >
+                <div
+                  v-if="item.Status === '已結清'"
+                  class="absolute -right-2 -bottom-2 text-emerald-50 opacity-50"
+                >
+                  <i data-lucide="check-circle-2" class="w-20 h-20"></i>
+                </div>
+                <div class="flex justify-between items-start relative z-10">
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0 relative transition-colors"
+                      :class="item.Status === '已結清' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-sky-50 text-sky-600'"
+                    >
+                      <div
+                        v-if="item.Status === '已結清'"
+                        class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border border-white shadow-sm"
+                      >
+                        <i
+                          data-lucide="check"
+                          class="w-2.5 h-2.5 text-white stroke-[3]"
+                        ></i>
+                      </div>
+                      <span class="text-[8px] font-bold uppercase -mb-1"
+                        >{{ safeGetMonthEng(item.Date) }}</span
+                      ><span class="text-sm font-black"
+                        >{{ safeGetDayNum(item.Date) }}</span
+                      >
+                    </div>
+                    <div>
+                      <h3
+                        class="text-sm font-bold text-slate-800 flex items-center leading-tight"
+                      >
+                        {{ item.Category || '未分類' }}<span
+                          v-if="item.Note"
+                          class="text-[10px] text-slate-400 ml-2 font-normal truncate max-w-[90px]"
+                          >{{ item.Note }}</span
+                        >
+                      </h3>
+                      <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span
+                          class="bg-slate-100 px-1.5 py-0.5 rounded text-[9px] text-slate-600 font-medium"
+                          >付款: {{ item.Payer || '無' }}</span
+                        ><span
+                          class="bg-sky-50 px-1.5 py-0.5 rounded text-[9px] text-sky-600 font-medium"
+                          >分攤: {{ item.Participants || '無' }}</span
+                        ><span
+                          v-if="item.PaymentMethod === '信用卡'"
+                          class="bg-rose-50 px-1.5 py-0.5 rounded text-[9px] text-rose-600 font-medium"
+                          >💳 刷卡</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-right shrink-0 ml-2">
+                    <div v-if="filterPerson" class="mb-0.5">
+                      <span class="text-[9px] font-bold text-sky-400 mr-1"
+                        >個人應付</span
+                      ><span
+                        class="font-black text-sm transition-all"
+                        :class="item.Status === '已結清' ? 'line-through opacity-40 text-slate-400' : 'text-sky-600'"
+                        >NT$ {{ formatMoney(safeGetFinalTwd(item) /
+                        getPartsCount(item)) }}</span
+                      >
+                    </div>
+                    <p
+                      class="font-black text-slate-800"
+                      :class="filterPerson ? 'text-[10px] opacity-40' : 'text-sm'"
+                    >
+                      <span v-if="filterPerson" class="mr-1">原幣總額</span>{{
+                      item.Currency }} {{ item.Amount || 0 }}
+                    </p>
+                    <p
+                      v-if="!filterPerson"
+                      class="text-[11px] font-bold mt-0.5 transition-colors"
+                      :class="item.Status === '已結清' ? 'text-emerald-500' : 'text-slate-500'"
+                    >
+                      總計 NT$ {{ formatMoney(safeGetFinalTwd(item)) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-show="expenseSubView === 'chart'"
+            class="animate-fadeIn space-y-5"
+          >
+            <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-1">
+              <button
+                @click="chartFilterPerson = ''"
+                class="px-4 py-1.5 rounded-full text-[11px] font-bold border"
+                :class="chartFilterPerson === '' ? 'bg-sky-500 text-white border-sky-500' : 'bg-white text-slate-500 border-slate-200'"
+              >
+                全團總花費</button
+              ><button
+                v-for="p in uniquePersons"
+                :key="p"
+                @click="chartFilterPerson = p"
+                class="px-4 py-1.5 rounded-full text-[11px] font-bold border"
+                :class="chartFilterPerson === p ? 'bg-sky-500 text-white border-sky-500' : 'bg-white text-slate-500 border-slate-200'"
+              >
+                {{ p }}
+              </button>
+            </div>
+            <div
+              class="bg-white p-6 rounded-[2rem] card-shadow border border-slate-50 relative overflow-hidden"
+            >
+              <div
+                class="absolute -right-4 -bottom-4 opacity-5 pointer-events-none text-9xl font-black italic text-sky-600"
+              >
+                $
+              </div>
+              <div class="relative z-10">
+                <p class="text-[10px] font-bold text-sky-600 mb-1">
+                  {{ chartFilterPerson ? `${chartFilterPerson.toUpperCase()}
+                  的總金額` : '目前總花費' }} (NTD)
+                </p>
+                <div class="flex items-baseline mt-2">
+                  <span
+                    class="text-4xl font-black text-slate-800 tracking-tight"
+                    >${{ chartTotalAmount }}</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div
+                v-for="(item, index) in categoryData"
+                :key="index"
+                class="bg-white p-5 rounded-[1.5rem] card-shadow border border-slate-50 flex flex-col"
+              >
+                <div class="flex justify-between items-center mb-2 z-10">
+                  <div class="flex items-center space-x-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center shrink-0"
+                    >
+                      <i
+                        :data-lucide="getCategoryIcon(item.name)"
+                        class="w-5 h-5"
+                      ></i>
+                    </div>
+                    <span class="font-black text-slate-800 text-sm"
+                      >{{ item.name }}</span
+                    >
+                  </div>
+                  <div class="text-right">
+                    <span class="font-black text-slate-800 text-sm"
+                      >NT$ {{ formatMoney(item.amount) }}</span
+                    >
+                  </div>
+                </div>
+                <div class="flex items-center space-x-3 w-full mt-2">
+                  <div
+                    class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden"
+                  >
+                    <div
+                      class="bg-sky-400 h-1.5 rounded-full"
+                      :style="{ width: item.rawPercentage + '%' }"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-[10px] text-sky-500 font-bold w-10 text-right"
+                    >{{ item.percentage }}%</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="chartFilterPerson === ''"
+              class="bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-[2rem] p-6 text-white shadow-lg mt-6 relative overflow-hidden"
+            >
+              <div
+                class="absolute -right-4 -top-4 opacity-10 pointer-events-none"
+              >
+                <i data-lucide="handshake" class="w-32 h-32"></i>
+              </div>
+              <div class="relative z-10">
+                <h2 class="text-sm font-black mb-1 flex items-center">
+                  <i data-lucide="calculator" class="w-4 h-4 mr-2"></i
+                  >未付款分帳結算 (NTD)
+                </h2>
+                <p class="text-[9px] text-emerald-100 mb-4">
+                  *已扣除標記為「已結清」之項目
+                </p>
+                <div
+                  v-if="settlements.length === 0"
+                  class="text-center py-4 bg-white/20 rounded-xl mb-4"
+                >
+                  <p class="text-xs font-bold">目前大家互不相欠！</p>
+                </div>
+                <div v-else class="space-y-3 mb-5">
+                  <div
+                    v-for="(txn, index) in settlements"
+                    :key="index"
+                    class="bg-white/95 text-slate-800 rounded-xl p-3.5 flex justify-between items-center"
+                  >
+                    <div class="flex items-center space-x-2.5">
+                      <span class="font-black text-sm text-rose-500"
+                        >{{ txn.from }}</span
+                      ><i
+                        data-lucide="arrow-right"
+                        class="w-4 h-4 text-slate-300"
+                      ></i
+                      ><span class="font-black text-sm text-emerald-600"
+                        >{{ txn.to }}</span
+                      >
+                    </div>
+                    <div class="flex items-baseline space-x-1">
+                      <span class="text-[10px] font-bold text-slate-400"
+                        >NT$</span
+                      ><span class="font-black text-lg"
+                        >{{ formatMoney(txn.amount) }}</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/20"
+                >
+                  <h3
+                    class="text-[10px] font-bold mb-2 opacity-90 border-b border-white/20 pb-1.5 flex justify-between"
+                  >
+                    <span>驗算明細表 (僅列未結清)</span
+                    ><span class="opacity-75"
+                      >已代墊 － 應分攤 ＝ 結餘淨值</span
+                    >
+                  </h3>
+                  <div
+                    v-for="(data, person) in verificationData"
+                    :key="person"
+                    class="flex justify-between items-center text-[10px] mb-1.5 last:mb-0"
+                  >
+                    <span class="font-bold w-12 truncate">{{person}}</span>
+                    <div
+                      class="flex-1 text-right font-mono tracking-tighter opacity-80"
+                    >
+                      {{formatMoney(data.paid)}} - {{formatMoney(data.spent)}} =
+                    </div>
+                    <span
+                      class="font-black w-12 text-right text-[11px]"
+                      :class="data.balance >= 0 ? 'text-white' : 'text-rose-200'"
+                      >{{ data.balance > 0 ? '+' : '' }}{{
+                      formatMoney(data.balance) }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="currentView === 'guide'"
+          class="space-y-6 animate-fadeIn pb-12"
+        >
+          <div
+            class="flex overflow-x-auto space-x-2 pb-2 hide-scrollbar sticky top-[88px] z-30 bg-[#f0f9ff]/95 backdrop-blur-md pt-3 -mx-5 px-5 shadow-sm"
+          >
+            <button
+              @click="openGuideSection('campervan')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-slate-700 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="truck" class="w-3 h-3 mr-1"></i>露營車
+            </button>
+            <button
+              v-if="guideDocs.length > 0"
+              @click="openGuideSection('docs')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-indigo-500 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="folder-open" class="w-3 h-3 mr-1"></i>重要文件
+            </button>
+            <button
+              @click="openGuideSection('emergency')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-rose-500 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="phone-call" class="w-3 h-3 mr-1"></i>緊急聯絡
+            </button>
+            <button
+              @click="openGuideSection('money')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-amber-500 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="banknote" class="w-3 h-3 mr-1"></i>支付
+            </button>
+            <button
+              @click="openGuideSection('driving')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-sky-600 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="car" class="w-3 h-3 mr-1"></i>自駕
+            </button>
+            <button
+              v-if="guideWishlist.length > 0"
+              @click="openGuideSection('wishlist')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-purple-500 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="star" class="w-3 h-3 mr-1"></i>許願清單
+            </button>
+            <button
+              v-if="guideLoot.length > 0"
+              @click="openGuideSection('loot')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-pink-500 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="shopping-bag" class="w-3 h-3 mr-1"></i>戰利品
+            </button>
+            <button
+              v-if="guideInsurance.length > 0"
+              @click="openGuideSection('insurance')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-indigo-600 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="shield-check" class="w-3 h-3 mr-1"></i>保險
+            </button>
+            <button
+              v-if="guideInternet.length > 0"
+              @click="openGuideSection('internet')"
+              class="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white text-teal-600 shadow-sm border border-slate-100 flex items-center"
+            >
+              <i data-lucide="wifi" class="w-3 h-3 mr-1"></i>網路
+            </button>
+          </div>
+
+          <div
+            id="guide-campervan"
+            class="bg-white/70 backdrop-blur-md border-[1.5px] border-white text-slate-800 rounded-[2rem] p-5 shadow-[0_10px_40px_-10px_rgba(14,165,233,0.15)] relative overflow-hidden"
+          >
+            <div class="absolute -right-4 -top-4 opacity-[0.04]">
+              <i data-lucide="truck" class="w-32 h-32 text-sky-600"></i>
+            </div>
+
+            <div class="relative z-10">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h3
+                    class="font-bold flex items-center text-sm text-slate-800"
+                  >
+                    <i data-lucide="truck" class="w-4 h-4 mr-2 text-sky-500"></i
+                    >Maui 2 Berth Ultima
+                  </h3>
+                  <p class="text-[10px] text-slate-400 mt-0.5">
+                    露營車專屬資訊
+                  </p>
+                </div>
+                <div
+                  class="bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white flex items-center cursor-pointer shadow-sm"
+                  @click="isEditingPlate = true"
+                >
+                  <div v-if="!isEditingPlate" class="flex items-center">
+                    <span
+                      class="font-mono font-black text-sm tracking-widest mr-2 text-slate-700"
+                      >{{ campervanPlate }}</span
+                    >
+                    <i data-lucide="edit-3" class="w-3 h-3 text-sky-400"></i>
+                  </div>
+                  <div v-else class="flex items-center">
+                    <input
+                      type="text"
+                      v-model="campervanPlate"
+                      class="bg-transparent w-20 text-sm font-mono font-black outline-none border-b border-sky-300 text-slate-700 uppercase"
+                      @blur="savePlate"
+                      @keyup.enter="savePlate"
+                      autofocus
+                    />
+                    <i
+                      data-lucide="check"
+                      class="w-4 h-4 ml-1 text-emerald-500"
+                      @click.stop="savePlate"
+                    ></i>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <div
+                  class="bg-white/80 border border-white shadow-sm p-2.5 rounded-xl text-center"
+                >
+                  <p class="text-[9px] text-slate-400 font-bold mb-1 uppercase">
+                    Fuel 燃料
+                  </p>
+                  <p class="text-sm font-black text-emerald-500">Diesel</p>
+                </div>
+                <div
+                  class="bg-rose-50/80 border border-white shadow-sm p-2.5 rounded-xl text-center"
+                >
+                  <p class="text-[9px] text-rose-400 font-bold mb-1 uppercase">
+                    Height 限高
+                  </p>
+                  <p class="text-sm font-black text-rose-500">2.8m</p>
+                </div>
+                <div
+                  class="bg-white/80 border border-white shadow-sm p-2.5 rounded-xl text-center"
+                >
+                  <p class="text-[9px] text-slate-400 font-bold mb-1 uppercase">
+                    Width 寬度
+                  </p>
+                  <p class="text-sm font-black text-amber-500">2.0m</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-docs"
+            v-if="guideDocs.length > 0"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-indigo-50/50"
+              @click="toggleGuide('docs')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-indigo-100 p-2 rounded-xl text-indigo-500">
+                  <i data-lucide="folder-open" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">重要文件與憑證</h3>
+              </div>
+              <span
+                :class="guideState.docs ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.docs"
+              class="p-5 pt-0 border-t border-slate-50 mt-2 space-y-4"
+            >
+              <div
+                v-for="(item, idx) in guideDocs"
+                :key="idx"
+                class="bg-slate-50 rounded-xl p-4 border border-slate-100 relative"
+              >
+                <button
+                  @click.stop="openEditModal(item)"
+                  class="absolute top-3 right-3 text-indigo-400 bg-white border border-indigo-100 p-1.5 rounded-md shadow-sm active:scale-95 transition-transform"
+                >
+                  <i data-lucide="edit-3" class="w-3 h-3"></i>
+                </button>
+                <h4 class="font-bold text-slate-800 text-sm mb-3 pr-8">
+                  {{ item.Title }}
+                </h4>
+                <div
+                  v-if="item.Photo_Url"
+                  class="w-full bg-white rounded-xl border border-slate-200 overflow-hidden mb-3 shadow-sm p-2 flex justify-center"
+                >
+                  <img
+                    :src="item.Photo_Url"
+                    class="max-w-full h-auto object-contain max-h-48"
+                  />
+                </div>
+                <p
+                  v-if="item.Notes"
+                  class="text-[11px] text-slate-600 whitespace-pre-wrap mb-3 leading-relaxed bg-white p-3 rounded-lg border border-slate-100"
+                >
+                  {{ item.Notes }}
+                </p>
+                <a
+                  v-if="item.Attachment"
+                  :href="item.Attachment"
+                  target="_blank"
+                  class="w-full bg-indigo-500 text-white flex items-center justify-center py-2.5 rounded-lg text-xs font-bold active:scale-95 transition-transform"
+                  ><i data-lucide="external-link" class="w-3.5 h-3.5 mr-2"></i>
+                  開啟完整文件</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-money"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-amber-50/50"
+              @click="toggleGuide('money')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-amber-100 p-2 rounded-xl text-amber-500">
+                  <i data-lucide="banknote" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">匯率與支付建議</h3>
+              </div>
+              <span
+                :class="guideState.money ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.money"
+              class="p-5 pt-0 border-t border-slate-50 mt-2"
+            >
+              <div
+                class="bg-slate-50 p-4 rounded-2xl flex items-center justify-between mb-4 border border-slate-100"
+              >
+                <p
+                  class="text-xs text-slate-500 font-bold uppercase tracking-widest"
+                >
+                  紐幣 NZD
+                </p>
+                <p class="text-2xl font-black text-amber-500">
+                  ≈ {{ exchangeRates.NZD ? Math.round(exchangeRates.NZD*100)/100
+                  : 19.5 }} <span class="text-sm text-slate-400">TWD</span>
+                </p>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-start">
+                  <i
+                    data-lucide="credit-card"
+                    class="w-4 h-4 text-amber-500 mr-2 flex-shrink-0 mt-0.5"
+                  ></i>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    <b class="text-slate-800">主力支付：</b>99% 支援
+                    Apple/Google Pay，實體卡備用。
+                  </p>
+                </div>
+                <div class="flex items-start">
+                  <i
+                    data-lucide="fuel"
+                    class="w-4 h-4 text-amber-500 mr-2 flex-shrink-0 mt-0.5"
+                  ></i>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    <b class="text-slate-800">自助加油：</b
+                    >必須插入實體卡並輸入「4 位數預借現金密碼 (PIN)」。
+                  </p>
+                </div>
+                <div class="flex items-start">
+                  <i
+                    data-lucide="coins"
+                    class="w-4 h-4 text-amber-500 mr-2 flex-shrink-0 mt-0.5"
+                  ></i>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    <b class="text-slate-800">誠實箱：</b>準備約 $100
+                    紐幣現金，用於無人攤位或偏遠營地。
+                  </p>
+                </div>
+                <div class="flex items-start">
+                  <i
+                    data-lucide="alert-circle"
+                    class="w-4 h-4 text-amber-500 mr-2 flex-shrink-0 mt-0.5"
+                  ></i>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    <b class="text-slate-800">附加費：</b>刷卡通常會酌收 1.5% -
+                    2.5% 的 Surcharge。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-wishlist"
+            v-if="guideWishlist.length > 0"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-purple-50/50"
+              @click="toggleGuide('wishlist')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-purple-100 p-2 rounded-xl text-purple-500">
+                  <i data-lucide="star" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">許願清單 (行前預備)</h3>
+              </div>
+              <span
+                :class="guideState.wishlist ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.wishlist"
+              class="p-5 pt-0 border-t border-slate-50 mt-2"
+            >
+              <div class="grid grid-cols-2 gap-3">
+                <div
+                  v-for="(item, idx) in guideWishlist"
+                  :key="idx"
+                  class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm relative group cursor-pointer active:scale-95 transition-transform"
+                  @click="openEditModal(item)"
+                >
+                  <div class="aspect-square bg-slate-50 relative">
+                    <img
+                      v-if="item.Photo_Url"
+                      :src="item.Photo_Url"
+                      class="w-full h-full object-cover"
+                    />
+                    <div
+                      v-else
+                      class="w-full h-full flex items-center justify-center text-slate-300"
+                    >
+                      <i data-lucide="image" class="w-8 h-8 opacity-50"></i>
+                    </div>
+                  </div>
+                  <div class="p-2.5">
+                    <h4
+                      class="font-bold text-[11px] text-slate-800 line-clamp-2 leading-tight mb-1"
+                    >
+                      {{ item.Title }}
+                    </h4>
+                    <p
+                      v-if="item.Notes"
+                      class="text-[9px] text-slate-500 line-clamp-2 leading-relaxed"
+                    >
+                      {{ item.Notes }}
+                    </p>
+                    <p
+                      v-if="item.Amount_TWD"
+                      class="text-[10px] font-black text-purple-500 mt-1"
+                    >
+                      Ref: ${{ formatMoney(item.Amount_TWD) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-loot"
+            v-if="guideLoot.length > 0"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-pink-50/50"
+              @click="toggleGuide('loot')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-pink-100 p-2 rounded-xl text-pink-500">
+                  <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">戰利品</h3>
+              </div>
+              <span
+                :class="guideState.loot ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.loot"
+              class="p-3 pt-0 border-t border-slate-50 mt-2"
+            >
+              <div class="grid grid-cols-3 gap-1.5">
+                <div
+                  v-for="(item, idx) in guideLoot"
+                  :key="idx"
+                  class="aspect-square relative bg-slate-100 rounded-lg overflow-hidden shadow-sm cursor-pointer active:opacity-75 transition-opacity"
+                  @click="openEditModal(item)"
+                >
+                  <div
+                    v-if="item.Photo_Url && (item.Title || item.Notes)"
+                    class="absolute top-1 left-1 right-1 z-10"
+                  >
+                    <span
+                      class="bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm shadow-sm block truncate w-max max-w-[95%]"
+                    >
+                      {{ item.Title || item.Notes }}
+                    </span>
+                  </div>
+
+                  <img
+                    v-if="item.Photo_Url"
+                    :src="item.Photo_Url"
+                    class="w-full h-full object-cover"
+                  />
+                  <div
+                    v-else
+                    class="w-full h-full flex flex-col items-center justify-center bg-pink-50 text-pink-400 p-1.5 text-center border border-dashed border-pink-200"
+                  >
+                    <i
+                      data-lucide="camera"
+                      class="w-5 h-5 mb-1.5 opacity-60"
+                    ></i>
+                    <span
+                      class="text-[9px] font-bold leading-tight line-clamp-2 px-1"
+                      >{{ item.Title || item.Notes || '戰利品' }}</span
+                    >
+                  </div>
+                  <div
+                    v-if="item.Amount_TWD"
+                    class="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] font-black px-1.5 py-0.5 rounded backdrop-blur-sm shadow-sm z-10"
+                  >
+                    ${{ formatMoney(item.Amount_TWD) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-emergency"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-rose-50/50"
+              @click="toggleGuide('emergency')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-rose-100 p-2 rounded-xl text-rose-500">
+                  <i data-lucide="phone-call" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">緊急聯絡 & 實用語</h3>
+              </div>
+              <span
+                :class="guideState.emergency ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.emergency"
+              class="p-5 pt-0 border-t border-slate-50 mt-2"
+            >
+              <div
+                class="bg-rose-500 text-white p-3 rounded-xl mb-4 flex items-center justify-between"
+              >
+                <div>
+                  <p class="text-[10px] uppercase font-bold opacity-80">
+                    緊急電話 (警察/消防/救護車)
+                  </p>
+                  <p class="text-2xl font-black tracking-widest">111</p>
+                </div>
+                <i data-lucide="alert-triangle" class="w-8 h-8 opacity-50"></i>
+              </div>
+              <div
+                class="bg-slate-50 p-3 rounded-xl mb-4 flex items-center justify-between"
+              >
+                <div>
+                  <p class="text-[10px] text-slate-500 font-bold">
+                    非緊急報案專線
+                  </p>
+                  <p class="text-xl font-black text-slate-700">105</p>
+                </div>
+              </div>
+              <h4 class="text-xs font-bold text-slate-700 mb-2">
+                🆘 實用求救英文
+              </h4>
+              <div class="space-y-2">
+                <div class="bg-white border border-slate-100 p-2 rounded-lg">
+                  <p class="text-xs font-bold text-rose-600">
+                    I need an ambulance.
+                  </p>
+                  <p class="text-[10px] text-slate-500">我需要救護車。</p>
+                </div>
+                <div class="bg-white border border-slate-100 p-2 rounded-lg">
+                  <p class="text-xs font-bold text-rose-600">
+                    There has been a car accident.
+                  </p>
+                  <p class="text-[10px] text-slate-500">發生了車禍。</p>
+                </div>
+                <div class="bg-white border border-slate-100 p-2 rounded-lg">
+                  <p class="text-xs font-bold text-rose-600">
+                    My car has broken down.
+                  </p>
+                  <p class="text-[10px] text-slate-500">我的車拋錨了。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-driving"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-sky-50/50"
+              @click="toggleGuide('driving')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-sky-100 p-2 rounded-xl text-sky-600">
+                  <i data-lucide="car-front" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">露營車自駕須知</h3>
+              </div>
+              <span
+                :class="guideState.driving ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.driving"
+              class="p-5 pt-0 border-t border-slate-50 mt-2"
+            >
+              <p
+                class="text-xs text-slate-600 leading-relaxed mb-2 flex items-start"
+              >
+                <b class="text-sky-500 mr-1.5">•</b>
+                紐西蘭為「右駕左行」，轉彎請牢記口訣「左轉拐小彎，右轉拐大彎」。
+              </p>
+              <p
+                class="text-xs text-slate-600 leading-relaxed mb-2 flex items-start"
+              >
+                <b class="text-sky-500 mr-1.5">•</b> 圓環 (Roundabout)
+                規則：必須讓行右側來車，進入圓環前請減速。
+              </p>
+              <p
+                class="text-xs text-slate-600 leading-relaxed mb-2 flex items-start"
+              >
+                <b class="text-sky-500 mr-1.5">•</b>
+                露營車車身較高大，遇到強風請減速慢行雙手握緊方向盤。
+              </p>
+              <p
+                class="text-xs text-slate-600 leading-relaxed flex items-start"
+              >
+                <b class="text-sky-500 mr-1.5">•</b> 記得下載 CamperMate 或
+                Rankers App 尋找營地與加水/排水站。
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="guide-gear"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-orange-50/50"
+              @click="toggleGuide('gear')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-orange-100 p-2 rounded-xl text-orange-500">
+                  <i data-lucide="luggage" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">裝備建議</h3>
+              </div>
+              <span
+                :class="guideState.gear ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.gear"
+              class="p-5 pt-0 border-t border-slate-50 mt-2"
+            >
+              <div class="space-y-3">
+                <div class="flex items-start">
+                  <div class="text-orange-500 mr-2">•</div>
+                  <p class="text-xs text-slate-600">
+                    行李限制：隨身 7kg / 托運 20kg (建議壓縮袋)。
+                  </p>
+                </div>
+                <div class="flex items-start">
+                  <div class="text-orange-500 mr-2">•</div>
+                  <p class="text-xs text-slate-600">
+                    必備：防水登山鞋 (戶外/冰河必備)、防風防水外套。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-insurance"
+            v-if="guideInsurance.length > 0"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-indigo-50/50"
+              @click="toggleGuide('insurance')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-indigo-100 p-2 rounded-xl text-indigo-500">
+                  <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">保單資訊</h3>
+              </div>
+              <span
+                :class="guideState.insurance ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.insurance"
+              class="p-5 pt-0 border-t border-slate-50 mt-2 space-y-3"
+            >
+              <div
+                v-for="(item, idx) in guideInsurance"
+                :key="idx"
+                class="bg-slate-50 rounded-xl p-4 border border-slate-100 relative"
+              >
+                <button
+                  @click.stop="openEditModal(item)"
+                  class="absolute top-3 right-3 text-indigo-400 bg-white border border-indigo-100 p-1.5 rounded-md shadow-sm active:scale-95 transition-transform"
+                >
+                  <i data-lucide="edit-3" class="w-3 h-3"></i>
+                </button>
+                <h4 class="font-bold text-slate-800 text-sm mb-1 pr-8">
+                  {{ item.Title }}
+                </h4>
+                <p
+                  v-if="item.Notes"
+                  class="text-xs text-slate-500 whitespace-pre-wrap mb-3 leading-relaxed"
+                >
+                  {{ item.Notes }}
+                </p>
+                <a
+                  v-if="item.Attachment"
+                  :href="item.Attachment"
+                  target="_blank"
+                  class="w-full bg-indigo-500 text-white flex items-center justify-center py-2.5 rounded-lg text-xs font-bold active:scale-95 transition-transform"
+                  ><i data-lucide="external-link" class="w-3.5 h-3.5 mr-2"></i>
+                  查看保單憑證</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="guide-internet"
+            v-if="guideInternet.length > 0"
+            class="bg-white rounded-[2rem] card-shadow border border-slate-50 overflow-hidden"
+          >
+            <div
+              class="p-5 flex justify-between items-center cursor-pointer bg-teal-50/50"
+              @click="toggleGuide('internet')"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-teal-100 p-2 rounded-xl text-teal-600">
+                  <i data-lucide="wifi" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">網路與 eSIM</h3>
+              </div>
+              <span
+                :class="guideState.internet ? 'rotate-180' : ''"
+                class="transition-transform inline-block text-slate-400"
+                ><i data-lucide="chevron-down" class="w-5 h-5"></i
+              ></span>
+            </div>
+            <div
+              v-show="guideState.internet"
+              class="p-5 pt-0 border-t border-slate-50 mt-2 grid grid-cols-2 gap-3"
+            >
+              <div
+                v-for="(item, idx) in guideInternet"
+                :key="idx"
+                class="bg-slate-50 rounded-xl p-4 border border-slate-100 relative"
+              >
+                <button
+                  @click.stop="openEditModal(item)"
+                  class="absolute top-3 right-3 text-teal-500 bg-white border border-teal-100 p-1.5 rounded-md shadow-sm active:scale-95 transition-transform"
+                >
+                  <i data-lucide="edit-3" class="w-3 h-3"></i>
+                </button>
+                <h4 class="font-bold text-slate-800 text-sm mb-2 pr-8">
+                  {{ item.Title }}
+                </h4>
+                <div
+                  v-if="item.Photo_Url"
+                  class="w-32 h-32 mx-auto bg-white rounded-xl border border-slate-200 overflow-hidden mb-3 shadow-sm p-1"
+                >
+                  <img
+                    :src="item.Photo_Url"
+                    class="w-full h-full object-contain"
+                  />
+                </div>
+                <p
+                  v-if="item.Notes"
+                  class="text-xs text-slate-500 whitespace-pre-wrap mb-3 leading-relaxed bg-white p-3 rounded-lg border border-slate-100"
+                >
+                  <span class="font-bold text-teal-600 block mb-1"
+                    >連線說明：</span
+                  >{{ item.Notes }}
+                </p>
+                <a
+                  v-if="item.Attachment"
+                  :href="item.Attachment"
+                  target="_blank"
+                  class="w-full bg-teal-500 text-white flex items-center justify-center py-2.5 rounded-lg text-xs font-bold active:scale-95 transition-transform"
+                  ><i data-lucide="ticket" class="w-3.5 h-3.5 mr-2"></i>
+                  開啟憑證</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <nav
+        class="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-morphism h-22 flex justify-around items-center px-4 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(14,165,233,0.1)] z-40"
+      >
+        <button
+          @click="currentView = 'overview'"
+          class="flex flex-col items-center py-3 min-w-[50px]"
+          :class="currentView === 'overview' ? 'text-sky-600' : 'text-slate-300'"
+        >
+          <i data-lucide="calendar-days" class="w-5 h-5"></i
+          ><span class="text-[8px] mt-1.5 font-black uppercase tracking-widest"
+            >總覽</span
+          >
+        </button>
+        <button
+          @click="currentView = 'itinerary'"
+          class="flex flex-col items-center py-3 min-w-[50px]"
+          :class="currentView === 'itinerary' ? 'text-sky-600' : 'text-slate-300'"
+        >
+          <i data-lucide="map-pin" class="w-5 h-5"></i
+          ><span class="text-[8px] mt-1.5 font-black uppercase tracking-widest"
+            >行程</span
+          >
+        </button>
+        <button
+          @click="currentView = 'map'"
+          class="flex flex-col items-center py-3 min-w-[50px]"
+          :class="currentView === 'map' ? 'text-sky-600' : 'text-slate-300'"
+        >
+          <i data-lucide="map" class="w-5 h-5"></i
+          ><span class="text-[8px] mt-1.5 font-black uppercase tracking-widest"
+            >地圖</span
+          >
+        </button>
+        <button
+          @click="currentView = 'expenses'"
+          class="flex flex-col items-center py-3 min-w-[50px]"
+          :class="currentView === 'expenses' ? 'text-sky-600' : 'text-slate-300'"
+        >
+          <i data-lucide="wallet" class="w-5 h-5"></i
+          ><span class="text-[8px] mt-1.5 font-black uppercase tracking-widest"
+            >費用</span
+          >
+        </button>
+        <button
+          @click="currentView = 'guide'"
+          class="flex flex-col items-center py-3 min-w-[50px]"
+          :class="currentView === 'guide' ? 'text-sky-600' : 'text-slate-300'"
+        >
+          <i data-lucide="lightbulb" class="w-5 h-5"></i
+          ><span class="text-[8px] mt-1.5 font-black uppercase tracking-widest"
+            >指南</span
+          >
+        </button>
+      </nav>
+
+      <div
+        v-if="showItiEdit"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-5 animate-fadeIn"
+        @click.self="showItiEdit = false"
+      >
+        <div
+          class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative"
+        >
+          <button
+            @click="showItiEdit = false"
+            class="absolute top-4 right-4 w-8 h-8 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+          <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center">
+            <i data-lucide="edit-3" class="w-5 h-5 text-sky-500 mr-2"></i>
+            編輯卡片內容
+          </h3>
+
+          <div class="space-y-4">
+            <div>
+              <label
+                class="block text-[11px] font-bold text-sky-500 uppercase mb-1.5"
+                >照片網址 (Photo URL)</label
+              >
+              <input
+                type="text"
+                v-model="itiEditForm.photoUrl"
+                placeholder="貼上照片連結..."
+                class="w-full bg-slate-50 border border-slate-100 text-slate-700 text-xs rounded-xl p-3 outline-none focus:ring-2 focus:ring-sky-200"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-bold text-sky-500 uppercase mb-1.5"
+                >備註 / 遊記 (Notes)</label
+              >
+              <textarea
+                v-model="itiEditForm.notes"
+                rows="4"
+                placeholder="記錄一下心得或注意事項..."
+                class="w-full bg-slate-50 border border-slate-100 text-slate-700 text-xs rounded-xl p-3 outline-none focus:ring-2 focus:ring-sky-200 resize-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <button
+            @click="saveItineraryEdit"
+            :disabled="isSavingIti"
+            class="w-full mt-6 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition-all flex justify-center items-center bg-sky-500 shadow-sky-200 disabled:opacity-60"
+          >
+            <i
+              v-if="isSavingIti"
+              data-lucide="loader-2"
+              class="w-5 h-5 mr-2 animate-spin"
+            ></i
+            ><i v-else data-lucide="save" class="w-4 h-4 mr-2"></i> {{
+            isSavingIti ? '儲存中...' : '儲存變更' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp, ref, reactive, computed, watch, onMounted, nextTick } =
+        Vue;
+
+      createApp({
+        setup() {
+          const currentView = ref("overview");
+          const activeDayIndex = ref(0);
+          const allExpanded = ref(false);
+
+          const API_URL =
+            "https://script.google.com/macros/s/AKfycbwAzJWTeHAIOfIDmeeAFP4rZVFYQRnhxIqzG5YK71DX4DSNTZvDCbtEIHMLlqVpoNNT6g/exec";
+          const expenseSubView = ref("list");
+          const editMode = ref(false);
+          const currentEditId = ref("");
+          const records = ref([]);
+          const flatItineraryList = ref([]);
+          const isLoadingList = ref(false);
+          const filterPerson = ref("");
+          const chartFilterPerson = ref("");
+
+          const isRateLive = ref(false);
+          const exchangeRates = reactive({
+            GBP: 41.5,
+            ISK: 0.23,
+            EUR: 34.5,
+            NZD: 19.5,
+            JPY: 0.21,
+            NTD: 1,
+          });
+
+          const form = reactive({
+            date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+              .toISOString()
+              .split("T")[0],
+            payer: "Max",
+            participants: ["Libby", "Max"],
+            amount: "",
+            currency: "NTD",
+            category: "",
+            note: "",
+            paymentMethod: "現金",
+            actualTwd: "",
+            isSettled: false,
+          });
+
+          const quickOptions = {
+            payers: ["Libby", "Max"],
+            currencies: ["NTD", "NZD", "GBP", "ISK"],
+            categories: [
+              "機票",
+              "網路",
+              "保險",
+              "住宿",
+              "交通",
+              "娛樂",
+              "餐費",
+              "生活費",
+              "購物",
+              "伴手禮",
+              "明信片",
+            ],
+          };
+
+          const isSubmitting = ref(false);
+          // 離線佇列與網路狀態
+          const offlineQueue = ref(
+            JSON.parse(localStorage.getItem("offlineExpenses") || "[]"),
+          );
+          const isOnline = ref(navigator.onLine);
+
+          // 監聽手機網路連線狀態變更
+          window.addEventListener("online", () => {
+            isOnline.value = true;
+            syncOfflineExpenses();
+          });
+          window.addEventListener("offline", () => {
+            isOnline.value = false;
+          });
+
+          // 自動同步離線資料的函數
+          const syncOfflineExpenses = async () => {
+            if (offlineQueue.value.length === 0) return;
+            status.message = `🔄 網路已恢復，正在同步 ${offlineQueue.value.length} 筆離線紀錄...`;
+
+            const remainingQueue = [];
+            for (const payload of offlineQueue.value) {
+              try {
+                await fetch(API_URL, {
+                  method: "POST",
+                  body: JSON.stringify(payload),
+                  headers: { "Content-Type": "text/plain;charset=utf-8" },
+                });
+              } catch (e) {
+                remainingQueue.push(payload); // 失敗就保留在佇列中
+              }
+            }
+
+            offlineQueue.value = remainingQueue;
+            localStorage.setItem(
+              "offlineExpenses",
+              JSON.stringify(remainingQueue),
+            );
+
+            if (remainingQueue.length === 0) {
+              status.message = "✅ 離線紀錄已全部同步完成！";
+              setTimeout(() => {
+                status.message = "";
+                loadList();
+              }, 2000);
+            } else {
+              status.isError = true;
+              status.message = `⚠️ 尚有 ${remainingQueue.length} 筆未能同步，將在下次連線重試`;
+            }
+          };
+          const status = reactive({ message: "", isError: false });
+          const isManualTwd = ref(false);
+
+          const itinerary = ref([
+            {
+              shortDate: "04/25",
+              titleEmoji: "✈️",
+              transportTitle: "長途飛行啟程",
+              calLabel: "✈️<br>啟程",
+              description: "從台灣出發，轉機前往紐西蘭。",
+              weather: {
+                temp: "20°C",
+                desc: "晴",
+                wear: "舒適飛行裝",
+                sunset: "17:45",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "04/26",
+              titleEmoji: "🚐",
+              transportTitle: "抵達紐西蘭",
+              calLabel: "🚐<br>取車",
+              description: "抵達紐西蘭，領取露營車，超市大採購。",
+              weather: {
+                temp: "12°C",
+                desc: "多雲",
+                wear: "防風外套",
+                sunset: "17:43",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "04/27",
+              titleEmoji: "🦌",
+              transportTitle: "Deer Park Heights",
+              calLabel: "🦌<br>農場",
+              description: "開始南島探索之旅。",
+              weather: {
+                temp: "10°C",
+                desc: "晴",
+                wear: "毛帽與大衣",
+                sunset: "17:41",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "04/28",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "感受大自然的鬼斧神工。",
+              weather: {
+                temp: "8°C",
+                desc: "多雲",
+                wear: "洋蔥式穿搭",
+                sunset: "17:39",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "04/29",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "持續南島之旅。",
+              weather: {
+                temp: "9°C",
+                desc: "晴",
+                wear: "保暖防風",
+                sunset: "17:38",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "04/30",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "紐西蘭秋景絕美路線。",
+              weather: {
+                temp: "7°C",
+                desc: "雨",
+                wear: "防水外套",
+                sunset: "17:36",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/01",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "進入五月份，氣溫持續下降。",
+              weather: {
+                temp: "6°C",
+                desc: "晴",
+                wear: "羽絨衣",
+                sunset: "17:35",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/02",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "營地早晨的冷空氣很迷人。",
+              weather: {
+                temp: "5°C",
+                desc: "霜",
+                wear: "厚外套加手套",
+                sunset: "17:33",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/03",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "湖光山色倒影拍攝日。",
+              weather: {
+                temp: "8°C",
+                desc: "晴",
+                wear: "洋蔥式穿搭",
+                sunset: "17:31",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/04",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "享受慢步調的露營生活。",
+              weather: {
+                temp: "10°C",
+                desc: "多雲",
+                wear: "防風外套",
+                sunset: "17:30",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/05",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "品嚐當地特色餐點。",
+              weather: {
+                temp: "9°C",
+                desc: "晴",
+                wear: "輕薄羽絨",
+                sunset: "17:29",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/06",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "旅行的尾聲，準備採購伴手禮。",
+              weather: {
+                temp: "11°C",
+                desc: "陰",
+                wear: "大衣",
+                sunset: "17:28",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/07",
+              titleEmoji: "🏔️",
+              transportTitle: "南島探索",
+              calLabel: "🏔️<br>南島",
+              description: "最後一晚的營地之夜。",
+              weather: {
+                temp: "8°C",
+                desc: "晴",
+                wear: "保暖衣物",
+                sunset: "17:26",
+              },
+              spots: [],
+            },
+            {
+              shortDate: "05/08",
+              titleEmoji: "✈️",
+              transportTitle: "準備返航",
+              calLabel: "✈️<br>返航",
+              description: "依依不捨，前往機場還車準備搭機。",
+              weather: {
+                temp: "12°C",
+                desc: "晴",
+                wear: "舒適飛行裝",
+                sunset: "17:25",
+              },
+              spots: [],
+            },
+          ]);
+
+          const activeDay = computed(
+            () => itinerary.value[activeDayIndex.value] || {},
+          );
+
+          const guideState = reactive({
+            campervan: true,
+            emergency: false,
+            driving: false,
+            gear: false,
+            money: false,
+            docs: true,
+            wishlist: true,
+            loot: true,
+            insurance: false,
+            internet: false,
+            shopping: false,
+          });
+
+          let initPlate = "ABC123";
+          try {
+            const stored = localStorage.getItem("campervanPlate");
+            if (stored) initPlate = stored;
+          } catch (e) {}
+
+          const campervanPlate = ref(initPlate);
+          const isEditingPlate = ref(false);
+          const savePlate = () => {
+            try {
+              localStorage.setItem("campervanPlate", campervanPlate.value);
+            } catch (e) {}
+            isEditingPlate.value = false;
+            nextTick(() => lucide.createIcons());
+          };
+
+          const toggleGuide = (section) => {
+            guideState[section] = !guideState[section];
+            nextTick(() => lucide.createIcons());
+          };
+          const openGuideSection = (section) => {
+            guideState[section] = true;
+            nextTick(() => {
+              lucide.createIcons();
+              const el = document.getElementById(`guide-${section}`);
+              if (el) {
+                const y = el.getBoundingClientRect().top + window.scrollY - 130;
+                window.scrollTo({ top: y, behavior: "smooth" });
+              }
+            });
+          };
+
+          const guideDocs = computed(() =>
+            flatItineraryList.value.filter((i) => i.Category === "文件"),
+          );
+          const guideWishlist = computed(() =>
+            flatItineraryList.value.filter((i) => i.Category === "許願"),
+          );
+          const guideShopping = computed(() =>
+            flatItineraryList.value.filter((i) => i.Category === "購物"),
+          );
+          const guideLoot = computed(() =>
+            flatItineraryList.value.filter((i) =>
+              ["購物", "伴手禮", "明信片"].includes(i.Category),
+            ),
+          );
+          const guideInsurance = computed(() =>
+            flatItineraryList.value.filter((i) => i.Category === "保險"),
+          );
+          const guideInternet = computed(() =>
+            flatItineraryList.value.filter((i) => i.Category === "網路"),
+          );
+
+          const showItiEdit = ref(false);
+          const isSavingIti = ref(false);
+          const itiEditForm = reactive({ id: "", notes: "", photoUrl: "" });
+
+          const openEditModal = (spot) => {
+            itiEditForm.id = spot.ID;
+            itiEditForm.notes = spot.Notes || "";
+            itiEditForm.photoUrl = spot.Photo_Url || "";
+            showItiEdit.value = true;
+            nextTick(() => lucide.createIcons());
+          };
+
+          const saveItineraryEdit = async () => {
+            if (!itiEditForm.id) return;
+            isSavingIti.value = true;
+            const payload = {
+              action: "updateItinerary",
+              id: itiEditForm.id,
+              notes: itiEditForm.notes,
+              photoUrl: itiEditForm.photoUrl,
+            };
+            try {
+              await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify(payload),
+
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+              });
+              setTimeout(() => {
+                showItiEdit.value = false;
+                isSavingIti.value = false;
+                loadList();
+              }, 1500);
+            } catch (error) {
+              alert("儲存失敗請重試");
+              isSavingIti.value = false;
+            }
+          };
+
+          const toggleSpot = (index) => {
+            activeDay.value.spots[index].expanded =
+              !activeDay.value.spots[index].expanded;
+            nextTick(() => lucide.createIcons());
+          };
+          const toggleAllSpots = () => {
+            allExpanded.value = !allExpanded.value;
+            activeDay.value.spots.forEach(
+              (spot) => (spot.expanded = allExpanded.value),
+            );
+            nextTick(() => lucide.createIcons());
+          };
+
+          const formatTime = (timeStr) => {
+            if (!timeStr) return "";
+            if (typeof timeStr === "string" && !timeStr.includes("T"))
+              return timeStr;
+            const d = new Date(timeStr);
+            if (isNaN(d.getTime())) return String(timeStr);
+            return (
+              String(d.getHours()).padStart(2, "0") +
+              ":" +
+              String(d.getMinutes()).padStart(2, "0")
+            );
+          };
+
+          const getCategoryColor = (cat) => {
+            if (cat === "機票")
+              return { bg: "bg-sky-50", text: "text-sky-500" };
+            if (cat === "住宿")
+              return { bg: "bg-amber-50", text: "text-amber-500" };
+            if (cat === "餐費")
+              return { bg: "bg-rose-50", text: "text-rose-500" };
+            return { bg: "bg-emerald-50", text: "text-emerald-500" };
+          };
+          const getItineraryIcon = (category) => {
+            if (category === "機票") return "plane-takeoff";
+            if (category === "住宿") return "tent";
+            if (category === "餐費") return "utensils-crossed";
+            return "map-pin";
+          };
+
+          const getCalendarDayClass = (month, day) => {
+            const dateStr = `${month}/${day.toString().padStart(2, "0")}`;
+            const foundIndex = itinerary.value.findIndex(
+              (item) => item.shortDate === dateStr,
+            );
+            return foundIndex !== -1
+              ? "bg-sky-500 text-white shadow-lg shadow-sky-100 cursor-pointer"
+              : "text-slate-200";
+          };
+          const getCalendarLabel = (month, day) => {
+            const dateStr = `${month}/${day.toString().padStart(2, "0")}`;
+            const found = itinerary.value.find(
+              (item) => item.shortDate === dateStr,
+            );
+            return found ? found.calLabel : "";
+          };
+          const handleCalendarClick = (month, day) => {
+            const dateStr = `${month}/${day.toString().padStart(2, "0")}`;
+            const foundIndex = itinerary.value.findIndex(
+              (item) => item.shortDate === dateStr,
+            );
+            if (foundIndex !== -1) {
+              activeDayIndex.value = foundIndex;
+              currentView.value = "itinerary";
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          };
+
+          const fetchLiveRates = async () => {
+            try {
+              const res = await fetch("https://open.er-api.com/v6/latest/TWD");
+              const data = await res.json();
+              if (data && data.rates) {
+                if (data.rates.GBP) exchangeRates.GBP = 1 / data.rates.GBP;
+                if (data.rates.ISK) exchangeRates.ISK = 1 / data.rates.ISK;
+                if (data.rates.NZD) exchangeRates.NZD = 1 / data.rates.NZD;
+                isRateLive.value = true;
+              }
+            } catch (error) {
+              console.warn("無法取得匯率");
+            }
+          };
+
+          watch(
+            [
+              () => form.amount,
+              () => form.currency,
+              () => form.paymentMethod,
+              () => isRateLive.value,
+            ],
+            () => {
+              if (isManualTwd.value) return;
+              let amt = parseFloat(form.amount) || 0;
+              let curr = String(form.currency).toUpperCase().trim();
+              let twd = amt * (exchangeRates[curr] || 1);
+              if (form.paymentMethod === "信用卡" && curr !== "NTD")
+                twd *= 1.015;
+              form.actualTwd = Math.round(twd);
+            },
+          );
+
+          const onManualTwdInput = () => (isManualTwd.value = true);
+          const setPaymentMethod = (method) => {
+            form.paymentMethod = method;
+            isManualTwd.value = false;
+          };
+          const submitBtnText = computed(() =>
+            isSubmitting.value
+              ? "同步中..."
+              : editMode.value
+                ? "更新紀錄"
+                : "送出記帳",
+          );
+
+          const availableParticipants = computed(() => {
+            const list = [...quickOptions.payers];
+            if (form.payer && !list.includes(form.payer)) list.push(form.payer);
+            return list;
+          });
+          const uniquePersons = computed(() => {
+            const set = new Set(quickOptions.payers);
+            records.value.forEach((r) => {
+              if (r && r.Payer) set.add(String(r.Payer).trim());
+            });
+            return Array.from(set);
+          });
+          const displayRecords = computed(() => {
+            const valid = records.value.filter(
+              (r) => r && (r.Date || r.Amount),
+            );
+            return filterPerson.value
+              ? valid.filter(
+                  (r) =>
+                    r.Participants &&
+                    String(r.Participants).includes(filterPerson.value),
+                )
+              : valid;
+          });
+
+          const safeGetFinalTwd = (item) =>
+            item.ActualTwd ? parseFloat(item.ActualTwd) : 0;
+          const getPartsCount = (item) =>
+            item.Participants ? String(item.Participants).split(",").length : 1;
+
+          const formatMoney = (num) => {
+            const parsed = parseFloat(num);
+            if (isNaN(parsed)) return "0";
+            return Math.round(parsed).toLocaleString();
+          };
+
+          const safeGetMonthEng = (dateString) => {
+            try {
+              if (!dateString) return "-";
+              const d = new Date(dateString);
+              return isNaN(d.getTime())
+                ? "-"
+                : [
+                    "JAN",
+                    "FEB",
+                    "MAR",
+                    "APR",
+                    "MAY",
+                    "JUN",
+                    "JUL",
+                    "AUG",
+                    "SEP",
+                    "OCT",
+                    "NOV",
+                    "DEC",
+                  ][d.getMonth()];
+            } catch (e) {
+              return "-";
+            }
+          };
+          const safeGetDayNum = (dateString) => {
+            try {
+              if (!dateString) return "-";
+              const d = new Date(dateString);
+              return isNaN(d.getTime())
+                ? "-"
+                : String(d.getDate()).padStart(2, "0");
+            } catch (e) {
+              return "-";
+            }
+          };
+
+          const totalExpenseTWD = computed(() => {
+            let total = 0;
+            displayRecords.value.forEach((item) => {
+              total += filterPerson.value
+                ? safeGetFinalTwd(item) / getPartsCount(item)
+                : safeGetFinalTwd(item);
+            });
+            return formatMoney(total);
+          });
+          const chartTotalAmount = computed(() => {
+            let total = 0;
+            records.value.forEach((item) => {
+              if (
+                chartFilterPerson.value &&
+                (!item.Participants ||
+                  !String(item.Participants).includes(chartFilterPerson.value))
+              )
+                return;
+              total += chartFilterPerson.value
+                ? safeGetFinalTwd(item) / getPartsCount(item)
+                : safeGetFinalTwd(item);
+            });
+            return formatMoney(total);
+          });
+          const getCategoryIcon = (category) => {
+            const icons = {
+              機票: "plane",
+              網路: "wifi",
+              保險: "shield-check",
+              住宿: "building",
+              交通: "car",
+              娛樂: "ticket",
+              餐費: "utensils",
+              生活費: "shopping-bag",
+              購物: "shopping-cart",
+              伴手禮: "gift",
+              明信片: "mail",
+            };
+            return icons[category] || "receipt";
+          };
+
+          const categoryData = computed(() => {
+            const map = {};
+            let totalSum = 0;
+            records.value.forEach((item) => {
+              if (!item || (!item.Date && !item.Amount)) return;
+              if (
+                chartFilterPerson.value &&
+                (!item.Participants ||
+                  !String(item.Participants).includes(chartFilterPerson.value))
+              )
+                return;
+              const cat = item.Category || "未分類";
+              const twdAmt = chartFilterPerson.value
+                ? safeGetFinalTwd(item) / getPartsCount(item)
+                : safeGetFinalTwd(item);
+              if (!map[cat]) map[cat] = 0;
+              map[cat] += twdAmt;
+              totalSum += twdAmt;
+            });
+            return Object.keys(map)
+              .map((key) => ({
+                name: key,
+                amount: map[key],
+                percentage: (totalSum > 0
+                  ? (map[key] / totalSum) * 100
+                  : 0
+                ).toFixed(1),
+                rawPercentage: totalSum > 0 ? (map[key] / totalSum) * 100 : 0,
+              }))
+              .sort((a, b) => b.amount - a.amount);
+          });
+
+          const verificationData = computed(() => {
+            const result = {};
+            quickOptions.payers.forEach(
+              (p) => (result[p] = { paid: 0, spent: 0, balance: 0 }),
+            );
+            records.value.forEach((item) => {
+              if (!item || !item.Amount || item.Status === "已結清") return;
+              const payer = String(item.Payer || quickOptions.payers[0]).trim();
+              const parts = item.Participants
+                ? String(item.Participants)
+                    .split(",")
+                    .map((p) => p.trim())
+                    .filter((p) => p)
+                : [];
+              if (parts.length === 0) return;
+              const finalTwd = safeGetFinalTwd(item);
+              if (!result[payer])
+                result[payer] = { paid: 0, spent: 0, balance: 0 };
+              result[payer].paid += finalTwd;
+              parts.forEach((p) => {
+                if (!result[p]) result[p] = { paid: 0, spent: 0, balance: 0 };
+                result[p].spent += finalTwd / parts.length;
+              });
+            });
+            for (const p in result)
+              result[p].balance = result[p].paid - result[p].spent;
+            return result;
+          });
+
+          const settlements = computed(() => {
+            const balances = { ...verificationData.value };
+            let debtors = [],
+              creditors = [],
+              transactions = [];
+            for (const p in balances) {
+              if (balances[p].balance <= -1)
+                debtors.push({ person: p, amount: -balances[p].balance });
+              else if (balances[p].balance >= 1)
+                creditors.push({ person: p, amount: balances[p].balance });
+            }
+            debtors.sort((a, b) => b.amount - a.amount);
+            creditors.sort((a, b) => b.amount - a.amount);
+            let i = 0,
+              j = 0;
+            while (i < debtors.length && j < creditors.length) {
+              let d = debtors[i],
+                c = creditors[j];
+              let settle = Math.min(d.amount, c.amount);
+              if (settle >= 1)
+                transactions.push({
+                  from: d.person,
+                  to: c.person,
+                  amount: settle,
+                });
+              d.amount -= settle;
+              c.amount -= settle;
+              if (d.amount < 1) i++;
+              if (c.amount < 1) j++;
+            }
+            return transactions;
+          });
+
+          const cancelEdit = () => {
+            expenseSubView.value = "list";
+            editMode.value = false;
+            currentEditId.value = "";
+          };
+
+          const submitExpense = async () => {
+            if (!form.category) {
+              alert("⚠️ 請選擇或輸入類別！");
+              return;
+            }
+            if (form.participants.length === 0) {
+              alert("⚠️ 請至少選擇一位分攤者！");
+              return;
+            }
+            isSubmitting.value = true;
+
+            const payload = {
+              action: editMode.value ? "update" : "add",
+              id: editMode.value
+                ? currentEditId.value
+                : Date.now().toString(36) +
+                  Math.random().toString(36).substring(2),
+              date: form.date,
+              payer: form.payer,
+              participants: form.participants.join(", "),
+              amount: form.amount,
+              currency: form.currency,
+              category: form.category,
+              note: form.note,
+              paymentMethod: form.paymentMethod,
+              actualTwd: form.actualTwd,
+              status: form.isSettled ? "已結清" : "未結清",
+            };
+
+            // 📴 離線模式處理
+            if (!isOnline.value) {
+              offlineQueue.value.push(payload);
+              localStorage.setItem(
+                "offlineExpenses",
+                JSON.stringify(offlineQueue.value),
+              );
+
+              // ✨ 修正重點：把小寫的 payload 轉換成畫面看得懂的大寫 UI Record
+              const uiRecord = {
+                ID: payload.id,
+                Date: payload.date,
+                Payer: payload.payer,
+                Participants: payload.participants,
+                Amount: payload.amount,
+                Currency: payload.currency,
+                Category: payload.category,
+                Note: payload.note,
+                PaymentMethod: payload.paymentMethod,
+                ActualTwd: payload.actualTwd,
+                Status: payload.status,
+              };
+
+              // 改把大寫的 uiRecord 塞給畫面
+              records.value.unshift(uiRecord);
+              status.isError = false;
+              status.message = "📶 目前無網路，已暫存至手機，連線後將自動上傳";
+
+              setTimeout(() => {
+                editMode.value = false;
+                currentEditId.value = "";
+                form.amount = "";
+                form.note = "";
+                form.category = "";
+                form.actualTwd = "";
+                isManualTwd.value = false;
+                isSubmitting.value = false;
+                expenseSubView.value = "list";
+              }, 1500);
+              return;
+            }
+
+            // 📶 有網路的正常處理
+            status.message = "⏳ 雲端同步中...請稍候";
+            status.isError = false;
+            try {
+              await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+              });
+              setTimeout(() => {
+                loadList()
+                  .then(() => {
+                    editMode.value = false;
+                    currentEditId.value = "";
+                    form.amount = "";
+                    form.note = "";
+                    form.category = "";
+                    form.actualTwd = "";
+                    isManualTwd.value = false;
+                    status.message = "";
+                    form.isSettled = false;
+                    expenseSubView.value = "list";
+                    isSubmitting.value = false;
+                  })
+                  .catch(() => {
+                    status.isError = true;
+                    status.message = "❌ 載入失敗";
+                    isSubmitting.value = false;
+                  });
+              }, 1500);
+            } catch (error) {
+              // 如果 Fetch 失敗（例如訊號突然斷掉），也轉入離線佇列
+              offlineQueue.value.push(payload);
+              localStorage.setItem(
+                "offlineExpenses",
+                JSON.stringify(offlineQueue.value),
+              );
+              records.value.unshift(payload);
+              status.isError = true;
+              status.message = "❌ 發生網路錯誤，已轉為離線暫存";
+              isSubmitting.value = false;
+              setTimeout(() => {
+                expenseSubView.value = "list";
+              }, 1500);
+            }
+          };
+
+          const startEdit = (item) => {
+            editMode.value = true;
+            currentEditId.value = item.ID;
+            form.date = item.Date
+              ? item.Date.split("T")[0]
+              : new Date().toISOString().split("T")[0];
+            form.payer = item.Payer || "Max";
+            form.participants = item.Participants
+              ? String(item.Participants)
+                  .split(",")
+                  .map((p) => p.trim())
+              : [];
+            form.amount = item.Amount || "";
+            form.currency = item.Currency || "NTD";
+            form.category = item.Category || "";
+            form.note = item.Note || "";
+            form.paymentMethod = item.PaymentMethod || "現金";
+            form.actualTwd = item.ActualTwd || safeGetFinalTwd(item);
+            form.isSettled = item.Status === "已結清";
+            isManualTwd.value = true;
+            expenseSubView.value = "add";
+          };
+
+          const loadList = async () => {
+            isLoadingList.value = true;
+            try {
+              const res = await fetch(`${API_URL}?t=${new Date().getTime()}`);
+              const data = await res.json();
+              if (data && data.expenses) {
+                records.value = data.expenses.sort((a, b) => {
+                  const tA = a.Date ? new Date(a.Date).getTime() : 0;
+                  const tB = b.Date ? new Date(b.Date).getTime() : 0;
+                  return (isNaN(tB) ? 0 : tB) - (isNaN(tA) ? 0 : tA);
+                });
+              }
+
+              if (data && data.itinerary) {
+                flatItineraryList.value = data.itinerary;
+                const grouped = {};
+                data.itinerary.forEach((item) => {
+                  if (!item.Date) return;
+                  const d = new Date(item.Date);
+                  if (isNaN(d.getTime())) return;
+                  const mmdd =
+                    String(d.getMonth() + 1).padStart(2, "0") +
+                    "/" +
+                    String(d.getDate()).padStart(2, "0");
+
+                  const hiddenInItinerary = [
+                    "保險",
+                    "網路",
+                    "購物",
+                    "伴手禮",
+                    "明信片",
+                    "文件",
+                    "許願",
+                  ];
+                  if (!hiddenInItinerary.includes(item.Category)) {
+                    if (!grouped[mmdd]) grouped[mmdd] = [];
+                    grouped[mmdd].push({
+                      ...item,
+                      expanded: allExpanded.value,
+                    });
+                  }
+                });
+                itinerary.value.forEach((day) => {
+                  if (grouped[day.shortDate])
+                    day.spots = grouped[day.shortDate].sort(
+                      (a, b) => (a.Order || 99) - (b.Order || 99),
+                    );
+                  else day.spots = [];
+                });
+              }
+            } catch (error) {
+              console.error(error);
+            } finally {
+              isLoadingList.value = false;
+              nextTick(() => lucide.createIcons());
+            }
+          };
+
+          watch(currentView, () => nextTick(() => lucide.createIcons()));
+
+          onMounted(() => {
+            fetchLiveRates();
+            loadList();
+          });
+
+          return {
+            currentView,
+            activeDayIndex,
+            itinerary,
+            activeDay,
+            getCalendarDayClass,
+            getCalendarLabel,
+            handleCalendarClick,
+            expenseSubView,
+            editMode,
+            records,
+            isLoadingList,
+            form,
+            quickOptions,
+            availableParticipants,
+            isSubmitting,
+            status,
+            uniquePersons,
+            filterPerson,
+            chartFilterPerson,
+            displayRecords,
+            totalExpenseTWD,
+            categoryData,
+            settlements,
+            verificationData,
+            isRateLive,
+            exchangeRates,
+            isManualTwd,
+            chartTotalAmount,
+            formatMoney,
+            getCategoryIcon,
+            safeGetFinalTwd,
+            getPartsCount,
+            safeGetMonthEng,
+            safeGetDayNum,
+            setPaymentMethod,
+            onManualTwdInput,
+            submitExpense,
+            loadList,
+            startEdit,
+            cancelEdit,
+            allExpanded,
+            toggleSpot,
+            toggleAllSpots,
+            formatTime,
+            getItineraryIcon,
+            getCategoryColor,
+            guideState,
+            toggleGuide,
+            openGuideSection,
+            guideInsurance,
+            guideInternet,
+            guideShopping,
+            guideDocs,
+            guideWishlist,
+            guideLoot,
+            showItiEdit,
+            itiEditForm,
+            isSavingIti,
+            openEditModal,
+            saveItineraryEdit,
+            campervanPlate,
+            isEditingPlate,
+            savePlate,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>
